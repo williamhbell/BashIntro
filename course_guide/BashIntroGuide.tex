@@ -1,0 +1,620 @@
+\documentclass[17pt,dvips]{foils}
+\usepackage{graphics}
+\usepackage{latexsym}
+ %
+ % Declare the title, author and date as you would in regular \LaTeX.
+ %
+\title{Basic Shell Programming}
+ %
+\author{W. H. Bell\\
+       \texttt{W.Bell@cern.ch}
+       }
+ % This is optional
+\date{\copyright 2010}
+
+\MyLogo{\bash shell programming introduction}   % this is the default
+\rightfooter{\textsf{\thepage}}   % this is the default \thepage
+\leftheader{W. H. Bell}
+\rightheader{2010}                % \filedate is defined above
+ %
+\newcommand\bs{\char '134}   %  a backslash character for the \tt font
+ %
+ % Now we can begin the document.  The first thing is the title page
+ % on which we might put a VERY short abstract.
+% Extra commands
+\def\bash{\texttt{BASH}$\;$}
+
+\begin{document}
+
+\maketitle
+ %
+\begin{abstract}
+\begin{center}
+A basic overview of the BASH scripting language is given.  The
+language is introduced using examples covering a few aspects at a
+time.  Reference tables are provided for commonly used \bash
+functionality.
+\end{center}
+\end{abstract}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{Introduction to \bash}
+\noindent ``Bash is an sh-compatible command language interpreter that executes
+commands read from the standard input or from a file.  Bash also
+incorporates useful features from the Korn and C shells (ksh and csh).''
+
+\begin{itemize}
+\item Compound Commands
+\begin{itemize}
+\item Loops: for, while, until,
+\item Conditional Statements: select, case, if 
+\end{itemize}
+\item File Operations
+\begin{itemize}
+\item Conditional Expressions
+\item Reading and Writing to Files
+\end{itemize}
+\item Expansion and Its Uses
+%Expansion is used when reading a file and in the pattern matching within the
+%topic of String Operations.
+\item Command line arguments
+\item String Operations
+\begin{itemize}
+\item Conditional Expressions
+\item Uses of Parameter Expansion
+\item Other Commands
+\end{itemize}
+\item Functions
+\item External Commands
+\end{itemize}
+
+\noindent Typing \texttt{man bash} gives a lot of extra information.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{Starting a Shell}
+\begin{itemize}
+\item Each user has a default shell: defined in passwd file.
+\begin{verbatim}
+]$ echo $SHELL
+/bin/bash
+\end{verbatim}
+\item Can start another shell from the default shell either by typing
+the name of the shell:
+\begin{verbatim}
+]$ bash
+\end{verbatim}
+or by creating a file with the \texttt{PATH} to the shell at the top
+of the file, eg:
+\begin{verbatim}
+]$ vi example_01.bash
+#!/bin/bash
+~          
+\end{verbatim} %$
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{A Basic Shell Program}
+\begin{itemize}
+\item First create a file containing the script.
+%
+\begin{verbatim}
+#!/bin/bash
+echo "In the beginning..."
+\end{verbatim}
+%
+\item The file does not need to have a specific file extension.  (For
+the examples given in this course the \bash scripts have a suffix of
+\texttt{.sh})
+%
+\item Then make the file executable
+%
+\begin{verbatim}
+]$ chmod u+x ex1.sh
+\end{verbatim}
+%
+\item And finally run the script.
+%
+\begin{verbatim}
+]$ ./ex1.sh
+In the beginning...
+\end{verbatim}
+%$
+\end{itemize}
+
+\vspace{1cm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{White Spaces and New Lines}
+\begin{itemize}
+\item Spaces and new lines are very important in shell programming.
+\item In many languages white spaces are ignored i.e. the compiler or
+interpreter skips over them.
+\item This is not so in basic shell programming.  Try taking some of
+the white spaces out of the following examples and see the result.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{Compound Commands: Loops: \texttt{for}}
+\begin{verbatim}
+#!/bin/bash
+
+word="a b c"
+i=0
+ 
+# Read each character from $word and and assign
+# it to $name
+for name in $word; do
+ 
+  # Use 'let' to increment i.
+  let i++
+ 
+  # Print the value of $name
+  echo $name
+ 
+done
+ 
+echo "Looped $i times."
+\end{verbatim}
+{\bf example\_02.sh}: A program to demonstrate a type 1 \texttt{for} loop.
+%
+% Notice the variable word is given a value without using the '$'
+% prefix and then the value is used with a dollar prefix.
+% Spaces here are very important: adding a space between i and = will
+% cause a compilation error.
+% Let provides arithmetic operations, which are not allowed outside 
+% (( )) brackets.
+% Finally 'echo' is a command normally accessible to users.  Other
+% commands can be used in a simular fashion.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{Compound Commands: Loops: \texttt{for}}
+\begin{verbatim}
+#!/bin/bash
+ 
+# Loop from 0 to 9.
+for((i=0; i<10; i++)) ; do
+ 
+  # Append the string form of i to the
+  # end of the string j
+  j=$j$i
+ 
+done
+ 
+echo $j
+\end{verbatim}
+%$
+{\bf example\_03.sh}: A program to demonstrate a type 2 \texttt{for} loop.
+% (( )) brackets contain arithmetic operations.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{Compound Commands: Loops: \texttt{while}, \texttt{until}}
+\begin{verbatim}
+#!/bin/bash
+
+nloops=3
+i=0
+ 
+echo "while loop"
+while [[ $i<$nloops ]]; do
+    echo $i
+    let i++
+done
+ 
+echo
+echo "until loop"
+i=0
+until [[ $i>$nloops ]]; do
+    echo $i
+    let i++
+done
+\end{verbatim}
+%$
+{\bf example\_04.sh}: A program to demonstrate \texttt{while} and 
+\texttt{until} loops.
+% The until loop version loops one more time wrt the while loop form.
+% [[ ]] contains boolean expression.  Must have a space between while
+% and [[
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{Compound Commands: \\Conditional Statements: \texttt{if}}
+\begin{verbatim}
+#!/bin/bash
+ 
+for ((i=0;i<3;i++)) do
+    if [[ $i == 1 ]]; then
+        echo "Turnip"
+    elif [[ $i == 2 ]]; then
+        echo "Potato"
+    else
+        echo "Carrot"
+    fi
+done
+\end{verbatim}
+%
+{\bf example\_05.sh}: A program to demonstrate \texttt{if}, \texttt{elif}, 
+\texttt{else} conditional statements.
+%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{File Operations: Conditional Expressions}
+
+\begin{verbatim}
+#!/bin/bash
+ 
+files="test test_dir test_link"
+ 
+for file in $files; do
+  if [[ -a $file ]]; then
+    echo "File $file Exists"
+  fi
+   
+  if [[ -f $file ]]; then
+    echo "File $file is a regular file"
+  fi
+   
+  if [[ -d $file ]]; then
+    echo "File $file is a directory"
+  fi
+                                                                                
+  if [[ -h $file ]]; then
+    echo "File $file is a symbolic link"
+  fi
+done
+\end{verbatim}
+%$
+{\bf example\_06.sh}: A program to that uses conditional expressions to test for
+the presence of a file.
+
+\foilhead{File Operations: Conditional Expressions}
+\begin{itemize}
+\item Before running example 6.
+\begin{verbatim}
+]$ touch test; mkdir test_dir
+]$ ln -s test test_link
+\end{verbatim}
+%$
+%\item Then try removing the file, directory etc.  Try replacing
+%\texttt{\$files} with \texttt{`ls`}.
+\end{itemize}
+{\tiny
+\begin{tabular}{|l|l|} \hline \hline
+Usage & Result \\ \hline \hline
+-a {\em file} & True if {\em file} exists\\ \hline
+-b {\em file} & True if {\em file} exists and is a block special file\\ \hline
+-c {\em file} & True if {\em file} exists and is a character special file\\ \hline
+-d {\em file} & True if {\em file} exists and is a directory. \\ \hline
+-e {\em file} & True if {\em file} exists\\ \hline
+-f {\em file} & True if {\em file} exists and is a regular {\em file}\\ \hline
+-g {\em file} & True if {\em file} exists and is set-group-id\\ \hline
+-h {\em file} & True if {\em file} exists and is a symbolic link\\ \hline
+-k {\em file} & True if {\em file} exists and its ``sticky'' bit is set\\ \hline
+-p {\em file} & True if {\em file} exists and is a named pipe (FIFO)\\ \hline
+-r {\em file} & True if {\em file} exists and is readable\\ \hline
+-s {\em file} & True if {\em file} exists and has a size greater than zero\\ \hline
+-u {\em file} & True if {\em file} exists and its set-user-id bit is set\\ \hline
+-w {\em file} & True if {\em file} exists and is writable\\ \hline
+-x {\em file} & True if {\em file} exists and is executable\\ \hline
+-O {\em file} & True if {\em file} exists and is owned by the effective user id\\ \hline
+-G {\em file} & True if {\em file} exists and is owned by  the  effective group id\\ \hline
+-L {\em file} & True if {\em file} exists and is a symbolic link\\ \hline
+-S {\em file} & True if {\em file} exists and is a socket\\ \hline
+-N {\em file} & True  if {\em file} exists and has been modified since it was last read\\ \hline
+{\em file1} -nt {\em file2}  & True if {\em file1} is newer than {\em file2}\\ \hline
+{\em file1} -ot {\em file2}  & True if {\em file1} is older than {\em file2}\\ \hline \hline
+\end{tabular}
+}
+% nt and ot are based on the modification date.
+% Missing off the -ef same inode and device.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{File Operations: Reading and Writing Files}
+\begin{verbatim}
+#!/bin/bash
+
+words="electron muon tau"
+outputfile="test.out"
+ 
+rm -f $outputfile
+ 
+for name in $words; do
+  echo $name >> $outputfile
+done
+ 
+echo "cat $outputfile:"
+cat $outputfile
+ 
+echo
+echo "Reading the words back in."
+for name in $(<$outputfile); do
+  str="$str$name, "
+done
+echo $str
+\end{verbatim}
+%$
+{\bf example\_07.sh}: A program demonstrate file i/o using output redirection.
+
+% File i/o is possible with blobs (pointer like type.)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{Expansion and Its Uses}
+\begin{verbatim}
+#!/bin/bash
+ 
+echo "Brace expansion - 1{2,3,4}5:"
+echo 1{2,3,4}5
+ 
+echo "Tilde Expansion HOME - ~:"
+echo ~
+ 
+echo "Tilde Expansion PWD - ~+:"
+echo ~+
+ 
+echo "Tilde Expansion wbell's HOME:"
+echo ~wbell/
+\end{verbatim}
+{\bf example\_08.sh}: A program to demonstrate brace and tilde expansion.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{Expansion and Its Uses}
+\begin{verbatim}
+#!/bin/bash
+  
+i=1
+j=4
+
+i=$((++i*j))
+                                                                         
+echo $i
+\end{verbatim}
+{\bf example\_09.sh}: A program to demonstrate arithmetic expansion
+
+\begin{itemize}
+\item Provides functionality of \texttt{let} i.e. \texttt{+}, 
+\texttt{-}, \texttt{*}, \texttt{/}, \texttt{**}
+\item Anything more complicated i.e. sine, sqrt etc: use \texttt{bc} or 
+\texttt{perl}
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{Command Line Arguments}
+\begin{verbatim}
+#!/bin/bash
+
+echo "The number of args following the command = $#";
+
+for arg in $* ; do
+    str="$str $arg"
+done
+
+echo "$0$str"
+\end{verbatim}
+{\bf example\_10.sh}: A simple program to illustrating how command line
+arguments can be read inside a shell program.
+% Change the ex number when the others above are known.
+
+\begin{itemize}
+\item Commands can be accessed directly by using \texttt{\$}$n$ where
+$n$ is the number of the command. E.g.
+\begin{verbatim}
+echo "The first argument is $1"
+\end{verbatim}
+%$
+\item Be careful to check the value is defined before using it.
+\end{itemize} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\foilhead{String Operations: Conditional Expressions}
+\begin{verbatim}
+#!/bin/bash
+ 
+if [[ -n $CHECK_ME ]]; then
+  echo "CHECK_ME = $CHECK_ME"
+else
+  echo "CHECK_ME is unset."
+fi
+\end{verbatim}
+{\bf example\_11.sh}: A program to demonstrate the use of
+conditional string operators.
+
+\noindent To test the example program try setting and unsetting the CHECK\_ME
+environmental variable:
+\begin{verbatim}
+]$ export CHECK_ME=1
+]$ unset CHECK_ME
+\end{verbatim}
+Run the script before and after the environmental variable is set.
+
+\foilhead{String Operations: Conditional Expressions}
+\begin{center}
+
+\begin{tabular}{|l|l|} \hline \hline
+Usage & Result \\ \hline \hline
+-z {\em string} & True if the length of string is zero \\ \hline
+-n {\em string} & True if the length of string is non-zero \\ \hline
+{\em string1} == {\em string2} & True if the strings are equal \\ \hline
+{\em string1} != {\em string2} & True if the strings are not equal \\ \hline \hline
+\end{tabular}
+
+\noindent A summary of the most useful conditional string operators.
+\end{center}
+% Have missed out the strange local dependent string > and <.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\foilhead{String Operations: Parameter Expansion}
+\begin{verbatim}
+#!/bin/bash
+
+somestring=abcdef
+
+echo "length = ${#somestring}"
+   
+i=2
+echo "After $i characters ${somestring:$i}"   
+echo "Before $i characters ${somestring: -$i}"
+   
+j=2
+echo "From char $i to of length $j ${somestring:$i:$j}"
+\end{verbatim}
+{\bf example\_12.sh}: A script demonstrating substring selection via Parameter Expansion.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{String Operations: Parameter Expansion}
+\begin{verbatim}
+#!/bin/bash
+
+parameter="filename.dat"
+word=".dat"
+
+remainder=${parameter%$word}
+
+echo "parameter=$parameter word=$word"
+echo "remainder=$remainder"
+\end{verbatim}
+%$
+{\bf example\_13.sh}: A script to remove part of a string using Parameter Expansion.
+
+\begin{itemize}
+\item There are two types of this sort of parameter expansion.
+\begin{itemize}
+  \item \texttt{\$\{parameter\#word\}} - Matching the beginning.
+  \item \texttt{\$\{parameter\%word\}} - Matching the end.
+\end{itemize}
+\item One \# or \% character for the shortest and two for the longest matching case.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{String Operations: Parameter Expansion}
+\begin{verbatim}
+#!/bin/bash
+
+parameter="filename.dat"
+pattern=".dat"
+string=".root"
+
+new_filename=${parameter/$pattern/$string}
+
+echo "parameter=$parameter pattern=$pattern"
+echo "string=$string"
+echo "new_filename=$new_filename"
+\end{verbatim}
+%$
+{\bf example\_14.sh}: A script to demonstrate string substitution using Parameter Expansion.
+
+\begin{itemize}
+\item The \texttt{pattern} is a pattern and not a \texttt{word}.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{String Operations: Pattern Matching}
+\begin{verbatim}
+#!/bin/bash
+
+filename1="string"
+filename2=" string "
+match1=$filename1
+match2=" string"
+
+if [[ "$filename1" == "$match1" ]]; then
+  echo "\"$match1\" matches \"$filename1\""
+fi
+ 
+if [[ "$filename2" == *"$match1"* ]]; then
+  echo "\"$match1\" matches \"$filename2\""
+fi
+
+if [[ "$filename2" == "$match2"* ]]; then
+  echo "\"$match2\" matches \"$filename2\""
+fi
+\end{verbatim}
+%$
+{\bf example\_15.sh}: A script demonstrating string pattern matching.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{String Operations: Other Commands}
+A range of commands outside of the bash language can be used to operate on 
+strings.
+\begin{itemize}
+\item \texttt{expr} - Provides many string operations together with logic and numeric functions.  (Type \texttt{info expr} for more information.) 
+\item \texttt{sed} -  A stream editor used to perform operations on text.
+\item \texttt{awk} - Is the interpreter for The AWK Programming Language.
+\end{itemize} 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{Functions}
+\begin{verbatim}
+...
+usage() {
+  echo ""
+  echo " Usage: $0 <directory>"
+  echo ""
+  exit 1
+}
+
+baddir() {
+  echo ""
+  echo " $1 can not be listed"
+  echo ""
+}
+...
+\end{verbatim}
+%$
+{\bf An extract from example\_16.sh}: Two functions: one using a global parameter, the other a local one.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{Functions}
+\begin{verbatim}
+...
+# Check at least one argument is given
+if [[ -z $1 ]]; then
+  usage
+fi
+...
+else
+  baddir $dir
+fi
+...
+\end{verbatim}
+{\bf An extract from example\_16.sh}: Calling the two functions previously defined.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\foilhead{External Commands}
+\begin{verbatim}
+...
+files=$(ls $dir)
+if [[ $? == 0 ]]; then
+...
+\end{verbatim}
+%$
+{\bf An extract from example\_16.sh}: Demonstrating how to execute external commands.
+\begin{itemize}
+\item \texttt{\$?} Contains the return value from the command.
+\item The return statement is the last return value.  Therefore do not put an \texttt{if} statement between the command and the test on \texttt{\$?} 
+\end{itemize}
+
+\end{document}
+\endinput
